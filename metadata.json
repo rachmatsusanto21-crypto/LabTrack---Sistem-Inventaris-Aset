@@ -1,0 +1,6 @@
+{
+  "name": "LabTrack - Sistem Inventaris & Peminjaman Lab Komputer",
+  "description": "Aplikasi manajemen inventaris lab komputer sekolah terintegrasi Google Sheets & Apps Script, QR Code, peminjaman, mode offline, dan cetak BAST resmi.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
