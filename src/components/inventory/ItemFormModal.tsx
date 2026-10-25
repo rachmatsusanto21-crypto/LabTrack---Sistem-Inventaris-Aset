@@ -410,7 +410,7 @@ export const ItemFormModal: React.FC<ItemFormModalProps> = ({
 
             <div>
               <label className="block text-slate-600 text-xs font-semibold mb-1">
-                Total Nilai Aset (=H*J)
+                Total Nilai Aset
               </label>
               <div className="px-3 py-1.5 border border-slate-300 rounded-lg bg-slate-100 font-bold font-mono text-indigo-700 truncate">
                 Rp {calculatedTotalPrice.toLocaleString('id-ID')}

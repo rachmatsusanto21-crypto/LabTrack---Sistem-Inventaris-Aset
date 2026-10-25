@@ -18,6 +18,15 @@ import {
 } from 'lucide-react';
 
 import { exportKIRToExcel } from '../../utils/excelExporter';
+import { LOGO_PEMKOT_MALANG_SVG } from '../../data/initialData';
+
+export const getSignatoryNameClass = (name?: string) => {
+  const len = (name || '').trim().length;
+  if (len > 34) return 'text-[8px] sm:text-[8.5px] print:text-[8px] leading-tight tracking-tight';
+  if (len > 26) return 'text-[9px] sm:text-[9.5px] print:text-[9px] leading-tight tracking-tight';
+  if (len > 20) return 'text-[10px] sm:text-[10.5px] print:text-[10px] leading-tight';
+  return 'text-xs leading-normal print:text-xs';
+};
 
 interface DocumentViewerProps {
   documents: OfficialDocument[];
@@ -179,28 +188,22 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
         
         {/* KOP RESMI PEMERINTAH KOTA MALANG & DINAS PENDIDIKAN */}
         <div className="border-b-[3px] border-slate-900 pb-2 mb-5 relative">
-          <div className="flex items-center gap-4 sm:gap-6">
-            {/* Logo Pemkot Malang / Sekolah */}
-            <div className="w-20 h-20 sm:w-22 sm:h-22 shrink-0 flex items-center justify-center p-1">
-              {schoolProfile.logoUrl ? (
+          <div className="flex items-center justify-between gap-3 sm:gap-6">
+            {/* Logo Pemkot Malang (Sisi Kiri Kop Surat) */}
+            <div className="w-18 h-20 sm:w-22 sm:h-24 shrink-0 flex items-center justify-center p-1">
+              {schoolProfile.showPemkotLogo !== false ? (
                 <img
-                  src={schoolProfile.logoUrl}
-                  alt="Logo"
+                  src={schoolProfile.pemkotLogoUrl || LOGO_PEMKOT_MALANG_SVG}
+                  alt="Lambang Pemkot Malang"
                   className="w-full h-full object-contain"
                 />
               ) : (
-                /* Emblem Standar Pemkot Malang / Tut Wuri Handayani */
-                <svg viewBox="0 0 100 100" className="w-full h-full">
-                  <polygon points="50,5 92,28 92,72 50,95 8,72 8,28" fill="#1e3a8a" stroke="#f59e0b" strokeWidth="4" />
-                  <circle cx="50" cy="50" r="30" fill="#ffffff" />
-                  <text x="50" y="47" fontFamily="Arial" fontSize="9" fontWeight="bold" fill="#1e3a8a" textAnchor="middle">PEMKOT</text>
-                  <text x="50" y="59" fontFamily="Arial" fontSize="9" fontWeight="bold" fill="#b91c1c" textAnchor="middle">MALANG</text>
-                </svg>
+                <div className="w-16 h-18"></div>
               )}
             </div>
 
-            {/* Kop Surat Header */}
-            <div className="flex-1 text-center">
+            {/* Kop Surat Header (Tengah) */}
+            <div className="flex-1 text-center px-1">
               <h2 className="text-xs sm:text-sm uppercase font-extrabold tracking-wider text-slate-800">
                 {schoolProfile.government || 'PEMERINTAH KOTA MALANG'}
               </h2>
@@ -216,6 +219,20 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               <p className="text-[9.5px] sm:text-[11px] text-slate-600">
                 Telepon: {schoolProfile.phone} | Email: {schoolProfile.email} | Web: {schoolProfile.website}
               </p>
+            </div>
+
+            {/* Logo Satuan Pendidikan / Tut Wuri Handayani (Sisi Kanan Kop Surat) */}
+            <div className="w-18 h-20 sm:w-22 sm:h-24 shrink-0 flex items-center justify-center p-1">
+              {schoolProfile.logoUrl ? (
+                <img
+                  src={schoolProfile.logoUrl}
+                  alt="Logo Satuan Pendidikan"
+                  className="w-full h-full object-contain"
+                />
+              ) : schoolProfile.showPemkotLogo !== false ? (
+                /* Ruang penyeimbang agar teks tengah tetap tepat di tengah */
+                <div className="w-16 h-18"></div>
+              ) : null}
             </div>
           </div>
           {/* Garis Ganda Standar Kedinasan */}
@@ -367,29 +384,29 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
               </table>
             </div>
 
-            {/* REKAPITULASI KONDISI BARANG OTOMATIS (RUMUS EXCEL SIMBADA BKAD) */}
+            {/* REKAPITULASI KONDISI BARANG OTOMATIS */}
             <div className="my-4 p-3 bg-slate-50 border border-slate-300 rounded-lg text-xs space-y-2">
               <div className="font-bold text-slate-900 uppercase tracking-wide flex items-center justify-between">
-                <span>Rekapitulasi Fisik & Kondisi Barang (Rumus SIMBADA):</span>
+                <span>Rekapitulasi Fisik & Kondisi Barang:</span>
                 <span className="font-mono text-blue-900 font-extrabold text-sm">
                   Total Nilai: Rp {totalAssetValue.toLocaleString('id-ID')},-
                 </span>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px]">
                 <div className="p-2 bg-white rounded border border-slate-200">
-                  <span className="text-slate-500 block">Total Fisik [=SUM]:</span>
+                  <span className="text-slate-500 block">Total Fisik:</span>
                   <strong className="text-slate-900 text-sm">{totalPhysicalUnits} Unit</strong>
                 </div>
                 <div className="p-2 bg-emerald-50 rounded border border-emerald-200">
-                  <span className="text-emerald-700 block">Baik (B) [=COUNTIF]:</span>
+                  <span className="text-emerald-700 block">Baik (B):</span>
                   <strong className="text-emerald-800 text-sm">{countBaik} Jenis</strong>
                 </div>
                 <div className="p-2 bg-amber-50 rounded border border-amber-200">
-                  <span className="text-amber-700 block">Kurang Baik (KB) [=COUNTIF]:</span>
+                  <span className="text-amber-700 block">Kurang Baik (KB):</span>
                   <strong className="text-amber-800 text-sm">{countKurangBaik} Jenis</strong>
                 </div>
                 <div className="p-2 bg-rose-50 rounded border border-rose-200">
-                  <span className="text-rose-700 block">Rusak Berat (RB) [=COUNTIF]:</span>
+                  <span className="text-rose-700 block">Rusak Berat (RB):</span>
                   <strong className="text-rose-800 text-sm">{countRusakBerat} Jenis (Usul Hapus)</strong>
                 </div>
               </div>
@@ -399,35 +416,41 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </div>
 
             {/* PENGESAHAN 3 PIHAK STANDAR SIMBADA KOTA MALANG */}
-            <div className="grid grid-cols-3 gap-4 text-center text-xs pt-4 page-break-inside-avoid font-sans">
-              <div>
+            <div className="grid grid-cols-3 gap-3 text-center text-xs pt-4 page-break-inside-avoid font-sans">
+              <div className="min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Mengetahui,
                   <br />
                   Kepala {schoolProfile.schoolName}
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                  {schoolProfile.headmasterName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
               </div>
 
-              <div>
+              <div className="min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Pengurus / Pengelola Barang Sekolah,
                   <br />
                   <span className="text-[10px] text-slate-500 font-normal">Kota Malang</span>
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.propertyOfficerName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.propertyOfficerNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.propertyOfficerName)}`}>
+                  {schoolProfile.propertyOfficerName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.propertyOfficerNip}</p>
               </div>
 
-              <div>
+              <div className="min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Malang, {formatIndoDate(new Date().toISOString().split('T')[0])}
                   <br />
                   Penanggung Jawab Ruang Lab Komputer
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.labHeadName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.labHeadNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.labHeadName)}`}>
+                  {schoolProfile.labHeadName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.labHeadNip}</p>
               </div>
             </div>
           </div>
@@ -532,30 +555,36 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </p>
 
             <div className="grid grid-cols-2 gap-8 text-center text-xs page-break-inside-avoid">
-              <div>
+              <div className="min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   1. Pengurus Barang Sekolah,
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.propertyOfficerName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.propertyOfficerNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.propertyOfficerName)}`}>
+                  {schoolProfile.propertyOfficerName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.propertyOfficerNip}</p>
               </div>
 
-              <div>
+              <div className="min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   2. PJ Laboratorium Komputer,
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.labHeadName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.labHeadNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.labHeadName)}`}>
+                  {schoolProfile.labHeadName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.labHeadNip}</p>
               </div>
 
-              <div className="col-span-2 pt-4 text-center">
+              <div className="col-span-2 pt-4 text-center min-w-0 px-1 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Mengetahui / Menyetujui,
                   <br />
                   <span className="font-bold">Kepala {schoolProfile.schoolName}</span>
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                  {schoolProfile.headmasterName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
               </div>
             </div>
           </div>
@@ -657,12 +686,14 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </p>
 
             <div className="flex justify-end text-center text-xs page-break-inside-avoid">
-              <div className="w-64">
+              <div className="w-72 min-w-0 px-2 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Kepala {schoolProfile.schoolName}
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                  {schoolProfile.headmasterName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
               </div>
             </div>
           </div>
@@ -768,24 +799,28 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </p>
 
             <div className="grid grid-cols-2 gap-8 text-center text-xs page-break-inside-avoid">
-              <div>
+              <div className="min-w-0 px-2 overflow-hidden">
                 <p className="font-semibold mb-16">
                   PIHAK KEDUA (Penerima),
                   <br />
                   Kepala {schoolProfile.schoolName}
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                  {schoolProfile.headmasterName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
               </div>
 
-              <div>
+              <div className="min-w-0 px-2 overflow-hidden">
                 <p className="font-semibold mb-16">
                   PIHAK PERTAMA (Pemberi),
                   <br />
                   Pejabat Pembuat Komitmen / Penyedia
                 </p>
-                <p className="font-bold underline uppercase">Bambang Triyono, S.T., M.T.</p>
-                <p className="text-[11px] text-slate-600">NIP. 19790614 200501 1 005</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass('Bambang Triyono, S.T., M.T.')}`}>
+                  Bambang Triyono, S.T., M.T.
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. 19790614 200501 1 005</p>
               </div>
             </div>
           </div>
@@ -863,22 +898,26 @@ export const DocumentViewer: React.FC<DocumentViewerProps> = ({
             </div>
 
             <div className="grid grid-cols-2 gap-8 text-center text-xs pt-6 page-break-inside-avoid">
-              <div>
+              <div className="min-w-0 px-2 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Mengetahui,
                   <br />
                   Kepala {schoolProfile.schoolName}
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                  {schoolProfile.headmasterName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
               </div>
 
-              <div>
+              <div className="min-w-0 px-2 overflow-hidden">
                 <p className="font-semibold mb-16">
                   Penanggung Jawab Lab Komputer,
                 </p>
-                <p className="font-bold underline uppercase">{schoolProfile.labHeadName}</p>
-                <p className="text-[11px] text-slate-600">NIP. {schoolProfile.labHeadNip}</p>
+                <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.labHeadName)}`}>
+                  {schoolProfile.labHeadName}
+                </p>
+                <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.labHeadNip}</p>
               </div>
             </div>
           </div>

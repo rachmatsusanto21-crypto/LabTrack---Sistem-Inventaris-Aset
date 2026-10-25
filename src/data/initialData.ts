@@ -9,6 +9,12 @@ const SAMPLE_PHOTO_UPS = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/
 
 const SAMPLE_PHOTO_PRINTER = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 150" fill="%23f1f5f9"><rect width="200" height="150" fill="%230f172a"/><rect x="40" y="40" width="120" height="65" rx="8" fill="%231e293b" stroke="%23f59e0b" stroke-width="3"/><rect x="60" y="20" width="80" height="25" fill="%23f8fafc" rx="2"/><rect x="65" y="90" width="70" height="20" fill="%23f8fafc" rx="2"/><circle cx="140" cy="55" r="4" fill="%23f59e0b"/><text x="100" y="138" font-family="Arial" font-size="9" fill="%23f59e0b" text-anchor="middle" font-weight="bold">PRINTER INKJET</text></svg>`;
 
+// Lambang Resmi Pemerintah Kota Malang (Vektor Presisi Standar Kop Surat BKAD & Dikbud)
+export const LOGO_PEMKOT_MALANG_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120"><defs><linearGradient id="shieldGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="%231e3a8a"/><stop offset="100%" stop-color="%230284c7"/></linearGradient><linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="%23fbbf24"/><stop offset="100%" stop-color="%23d97706"/></linearGradient></defs><polygon points="50,4 94,22 94,76 50,116 6,76 6,22" fill="url(%23shieldGrad)" stroke="%23fbbf24" stroke-width="3.5"/><polygon points="50,9 89,25 89,73 50,110 11,73 11,25" fill="none" stroke="%23ffffff" stroke-width="1.2" opacity="0.8"/><path d="M22,23 Q50,16 78,23 L76,29 Q50,22 24,29 Z" fill="%23dc2626"/><path d="M24,29 Q50,22 76,29 L74,34 Q50,27 26,34 Z" fill="%23ffffff"/><polygon points="50,24 52.5,30 58.5,30 53.5,34 55.5,40 50,36 44.5,40 46.5,34 41.5,30 47.5,30" fill="%23fef08a" stroke="%23d97706" stroke-width="0.5"/><circle cx="50" cy="65" r="23" fill="%230f172a" opacity="0.25"/><path d="M34,86 L66,86 L63,80 L37,80 Z" fill="url(%23goldGrad)"/><rect x="40" y="76" width="20" height="4" fill="%23f8fafc"/><polygon points="44,76 46,47 54,47 56,76" fill="%23ffffff" stroke="%2394a3b8" stroke-width="0.75"/><polygon points="50,37 47,47 53,47" fill="url(%23goldGrad)"/><circle cx="50" cy="37" r="1.5" fill="%23ef4444"/><path d="M36,80 C30,74 30,60 38,54 C34,62 36,73 42,78 Z" fill="%2322c55e"/><path d="M64,80 C70,74 70,60 62,54 C66,62 64,73 58,78 Z" fill="%2322c55e"/><path d="M16,91 Q50,85 84,91 L81,101 Q50,95 19,101 Z" fill="%23fef08a" stroke="%23b45309" stroke-width="1"/><text x="50" y="98" font-family="Arial, sans-serif" font-size="5.5" font-weight="900" fill="%231e3a8a" text-anchor="middle" letter-spacing="0.5">MALANG</text><text x="50" y="110" font-family="Arial, sans-serif" font-size="4.5" font-weight="bold" fill="%23fef08a" text-anchor="middle">PEMKOT</text></svg>`;
+
+// Logo Tut Wuri Handayani / Lambang Pendidikan
+export const LOGO_TUT_WURI_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,4 93,26 93,74 50,96 7,74 7,26" fill="%230284c7" stroke="%23f59e0b" stroke-width="3"/><circle cx="50" cy="50" r="32" fill="%23ffffff"/><path d="M50,22 C52,28 58,34 50,44 C42,34 48,28 50,22 Z" fill="%23ef4444"/><path d="M50,44 L32,58 L42,60 L50,54 L58,60 L68,58 Z" fill="%230284c7"/><polygon points="50,42 45,50 55,50" fill="%23f59e0b"/><path d="M26,64 Q50,78 74,64 L70,70 Q50,83 30,70 Z" fill="%23f59e0b"/><text x="50" y="90" font-family="Arial" font-size="6" font-weight="bold" fill="%23ffffff" text-anchor="middle">DIKBUD</text></svg>`;
+
 export const INITIAL_SCHOOL_PROFILE: SchoolProfile = {
   government: 'PEMERINTAH KOTA MALANG',
   opd: 'DINAS PENDIDIKAN DAN KEBUDAYAAN KOTA MALANG',
@@ -28,7 +34,9 @@ export const INITIAL_SCHOOL_PROFILE: SchoolProfile = {
   propertyOfficerNip: '19880921 201101 1 008',
   labHeadName: 'Achmad Fauzi, S.Pd.',
   labHeadNip: '19900312 201503 1 003',
-  logoUrl: '', // Default fallback logo Pemkot Malang / Dikbud handled in component
+  logoUrl: LOGO_TUT_WURI_SVG, // Logo Sekolah / Tut Wuri Handayani (Kanan Kop)
+  pemkotLogoUrl: LOGO_PEMKOT_MALANG_SVG, // Lambang Pemkot Malang (Kiri Kop)
+  showPemkotLogo: true, // Tampilkan Logo Pemkot Malang di Kop Surat
   letterPrefix: '050 / LAB-KOMP / 35.73.401.01',
 };
 

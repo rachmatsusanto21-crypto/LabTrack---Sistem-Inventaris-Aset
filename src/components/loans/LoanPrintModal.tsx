@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
 import { LoanTransaction, SchoolProfile } from '../../types/inventory';
+import { LOGO_PEMKOT_MALANG_SVG } from '../../data/initialData';
 import { Printer, X, FileText, CheckCircle2, Clock, Calendar, User } from 'lucide-react';
+
+const getSignatoryNameClass = (name?: string) => {
+  const len = (name || '').trim().length;
+  if (len > 34) return 'text-[8px] sm:text-[8.5px] print:text-[8px] leading-tight tracking-tight';
+  if (len > 26) return 'text-[9px] sm:text-[9.5px] print:text-[9px] leading-tight tracking-tight';
+  if (len > 20) return 'text-[10px] sm:text-[10.5px] print:text-[10px] leading-tight';
+  return 'text-xs leading-normal print:text-xs';
+};
 
 interface LoanPrintModalProps {
   loans: LoanTransaction[];
@@ -162,27 +171,24 @@ export const LoanPrintModal: React.FC<LoanPrintModalProps> = ({
         <div className="flex-1 p-4 sm:p-8 overflow-y-auto bg-slate-100 print:bg-white print:p-0">
           <div className="bg-white rounded-xl border border-slate-200 p-6 sm:p-10 max-w-4xl mx-auto print:border-none print:shadow-none print:p-0 print:m-0 print:max-w-none text-slate-900 font-sans">
             
-            {/* Kop Surat Pemkot Malang */}
+            {/* Kop Surat Pemkot Malang & Satuan Pendidikan */}
             <div className="border-b-[3px] border-slate-900 pb-2 mb-5">
-              <div className="flex items-center gap-4 sm:gap-6">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 shrink-0 flex items-center justify-center p-1">
-                  {schoolProfile.logoUrl ? (
+              <div className="flex items-center justify-between gap-3 sm:gap-6">
+                {/* Logo Pemkot Malang (Kiri) */}
+                <div className="w-16 h-18 sm:w-20 sm:h-22 shrink-0 flex items-center justify-center p-1">
+                  {schoolProfile.showPemkotLogo !== false ? (
                     <img
-                      src={schoolProfile.logoUrl}
-                      alt="Logo"
+                      src={schoolProfile.pemkotLogoUrl || LOGO_PEMKOT_MALANG_SVG}
+                      alt="Logo Pemkot Malang"
                       className="w-full h-full object-contain"
                     />
                   ) : (
-                    <svg viewBox="0 0 100 100" className="w-full h-full">
-                      <polygon points="50,5 92,28 92,72 50,95 8,72 8,28" fill="#1e3a8a" stroke="#f59e0b" strokeWidth="4" />
-                      <circle cx="50" cy="50" r="30" fill="#ffffff" />
-                      <text x="50" y="47" fontFamily="Arial" fontSize="9" fontWeight="bold" fill="#1e3a8a" textAnchor="middle">PEMKOT</text>
-                      <text x="50" y="59" fontFamily="Arial" fontSize="9" fontWeight="bold" fill="#b91c1c" textAnchor="middle">MALANG</text>
-                    </svg>
+                    <div className="w-14 h-16"></div>
                   )}
                 </div>
 
-                <div className="flex-1 text-center">
+                {/* Teks Kop Surat (Tengah) */}
+                <div className="flex-1 text-center px-1">
                   <h2 className="text-xs uppercase font-extrabold tracking-wider text-slate-800">
                     {schoolProfile.government || 'PEMERINTAH KOTA MALANG'}
                   </h2>
@@ -198,6 +204,19 @@ export const LoanPrintModal: React.FC<LoanPrintModalProps> = ({
                   <p className="text-[9px] sm:text-[10px] text-slate-600">
                     Telepon: {schoolProfile.phone} | Email: {schoolProfile.email}
                   </p>
+                </div>
+
+                {/* Logo Sekolah (Kanan) */}
+                <div className="w-16 h-18 sm:w-20 sm:h-22 shrink-0 flex items-center justify-center p-1">
+                  {schoolProfile.logoUrl ? (
+                    <img
+                      src={schoolProfile.logoUrl}
+                      alt="Logo Sekolah"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : schoolProfile.showPemkotLogo !== false ? (
+                    <div className="w-14 h-16"></div>
+                  ) : null}
                 </div>
               </div>
               <div className="w-full h-0.5 bg-slate-900 mt-2"></div>
@@ -276,24 +295,28 @@ export const LoanPrintModal: React.FC<LoanPrintModalProps> = ({
 
                 {/* Footer Pengesahan */}
                 <div className="grid grid-cols-2 gap-8 text-center text-xs pt-6 page-break-inside-avoid">
-                  <div>
+                  <div className="min-w-0 px-2 overflow-hidden">
                     <p className="font-semibold mb-16">
                       Mengetahui,
                       <br />
                       Kepala {schoolProfile.schoolName}
                     </p>
-                    <p className="font-bold underline uppercase">{schoolProfile.headmasterName}</p>
-                    <p className="text-[11px] text-slate-600">NIP. {schoolProfile.headmasterNip}</p>
+                    <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.headmasterName)}`}>
+                      {schoolProfile.headmasterName}
+                    </p>
+                    <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.headmasterNip}</p>
                   </div>
 
-                  <div>
+                  <div className="min-w-0 px-2 overflow-hidden">
                     <p className="font-semibold mb-16">
                       Malang, {formatIndoDate(new Date().toISOString().split('T')[0])}
                       <br />
                       Penanggung Jawab Ruang Lab Komputer
                     </p>
-                    <p className="font-bold underline uppercase">{schoolProfile.labHeadName}</p>
-                    <p className="text-[11px] text-slate-600">NIP. {schoolProfile.labHeadNip}</p>
+                    <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(schoolProfile.labHeadName)}`}>
+                      {schoolProfile.labHeadName}
+                    </p>
+                    <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.labHeadNip}</p>
                   </div>
                 </div>
               </div>
@@ -371,20 +394,24 @@ export const LoanPrintModal: React.FC<LoanPrintModalProps> = ({
                 </div>
 
                 <div className="grid grid-cols-2 gap-8 text-center text-xs page-break-inside-avoid">
-                  <div>
+                  <div className="min-w-0 px-2 overflow-hidden">
                     <p className="font-semibold mb-16">
                       Peminjam / Pengguna,
                     </p>
-                    <p className="font-bold underline uppercase">{activeSlipLoan.borrowerName}</p>
-                    <p className="text-[11px] text-slate-600">{activeSlipLoan.borrowerClassOrDept}</p>
+                    <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(activeSlipLoan.borrowerName)}`}>
+                      {activeSlipLoan.borrowerName}
+                    </p>
+                    <p className="text-[10.5px] text-slate-600 mt-0.5">{activeSlipLoan.borrowerClassOrDept}</p>
                   </div>
 
-                  <div>
+                  <div className="min-w-0 px-2 overflow-hidden">
                     <p className="font-semibold mb-16">
                       Petugas / Penanggung Jawab Lab,
                     </p>
-                    <p className="font-bold underline uppercase">{activeSlipLoan.officerName}</p>
-                    <p className="text-[11px] text-slate-600">NIP. {schoolProfile.labHeadNip}</p>
+                    <p className={`font-bold underline uppercase break-words max-w-full ${getSignatoryNameClass(activeSlipLoan.officerName)}`}>
+                      {activeSlipLoan.officerName}
+                    </p>
+                    <p className="text-[10.5px] text-slate-600 mt-0.5">NIP. {schoolProfile.labHeadNip}</p>
                   </div>
                 </div>
               </div>

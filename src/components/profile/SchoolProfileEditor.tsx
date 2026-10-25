@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { SchoolProfile } from '../../types/inventory';
+import { LOGO_PEMKOT_MALANG_SVG, LOGO_TUT_WURI_SVG } from '../../data/initialData';
 import {
   Building2,
   UserCheck,
@@ -13,6 +14,9 @@ import {
   Sparkles,
   MapPin,
   FileCode,
+  Shield,
+  Eye,
+  Check,
 } from 'lucide-react';
 
 interface SchoolProfileEditorProps {
@@ -21,36 +25,72 @@ interface SchoolProfileEditorProps {
 }
 
 export const SchoolProfileEditor: React.FC<SchoolProfileEditorProps> = ({ profile, onSave }) => {
-  const [formData, setFormData] = useState<SchoolProfile>({ ...profile });
+  const [formData, setFormData] = useState<SchoolProfile>({
+    ...profile,
+    pemkotLogoUrl: profile.pemkotLogoUrl || LOGO_PEMKOT_MALANG_SVG,
+    showPemkotLogo: profile.showPemkotLogo !== false,
+    logoUrl: profile.logoUrl || LOGO_TUT_WURI_SVG,
+  });
   const [saveSuccess, setSaveSuccess] = useState<boolean>(false);
-  const [logoPreview, setLogoPreview] = useState<string>(profile.logoUrl || '');
+  const [pemkotPreview, setPemkotPreview] = useState<string>(
+    profile.pemkotLogoUrl || LOGO_PEMKOT_MALANG_SVG
+  );
+  const [schoolLogoPreview, setSchoolLogoPreview] = useState<string>(
+    profile.logoUrl || LOGO_TUT_WURI_SVG
+  );
 
-  const handleChange = (field: keyof SchoolProfile, value: string) => {
+  const handleChange = (field: keyof SchoolProfile, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePemkotLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > 2 * 1024 * 1024) {
-      alert('Ukuran file logo maksimal 2MB!');
+      alert('Ukuran file logo Pemkot maksimal 2MB!');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      setLogoPreview(result);
+      setPemkotPreview(result);
+      setFormData((prev) => ({ ...prev, pemkotLogoUrl: result, showPemkotLogo: true }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleSchoolLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran file logo sekolah maksimal 2MB!');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      setSchoolLogoPreview(result);
       setFormData((prev) => ({ ...prev, logoUrl: result }));
     };
     reader.readAsDataURL(file);
   };
 
-  const handleSetMalangLogo = () => {
-    const malangSvg = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,5 92,28 92,72 50,95 8,72 8,28" fill="%231e3a8a" stroke="%23f59e0b" stroke-width="4"/><circle cx="50" cy="50" r="30" fill="%23ffffff"/><text x="50" y="47" font-family="Arial" font-size="9" font-weight="bold" fill="%231e3a8a" text-anchor="middle">PEMKOT</text><text x="50" y="59" font-family="Arial" font-size="9" font-weight="bold" fill="%23b91c1c" text-anchor="middle">MALANG</text></svg>`;
-    setLogoPreview(malangSvg);
-    setFormData((prev) => ({ ...prev, logoUrl: malangSvg }));
+  const handleSetDefaultPemkotLogo = () => {
+    setPemkotPreview(LOGO_PEMKOT_MALANG_SVG);
+    setFormData((prev) => ({
+      ...prev,
+      pemkotLogoUrl: LOGO_PEMKOT_MALANG_SVG,
+      showPemkotLogo: true,
+    }));
+  };
+
+  const handleSetDefaultSchoolLogo = () => {
+    setSchoolLogoPreview(LOGO_TUT_WURI_SVG);
+    setFormData((prev) => ({ ...prev, logoUrl: LOGO_TUT_WURI_SVG }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -77,16 +117,27 @@ export const SchoolProfileEditor: React.FC<SchoolProfileEditorProps> = ({ profil
             </p>
           </div>
 
-          <div className="w-20 h-20 bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-2 flex items-center justify-center shrink-0">
-            {logoPreview ? (
-              <img
-                src={logoPreview}
-                alt="Logo Sekolah"
-                className="w-full h-full object-contain drop-shadow"
-              />
-            ) : (
-              <Building2 className="w-10 h-10 text-blue-300 opacity-80" />
+          <div className="flex items-center gap-2.5 shrink-0">
+            {formData.showPemkotLogo && pemkotPreview && (
+              <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-1.5 flex items-center justify-center" title="Logo Pemkot Malang">
+                <img
+                  src={pemkotPreview}
+                  alt="Logo Pemkot Malang"
+                  className="w-full h-full object-contain drop-shadow"
+                />
+              </div>
             )}
+            <div className="w-16 h-16 bg-white/10 backdrop-blur rounded-2xl border border-white/20 p-1.5 flex items-center justify-center" title="Logo Sekolah / Tut Wuri">
+              {schoolLogoPreview ? (
+                <img
+                  src={schoolLogoPreview}
+                  alt="Logo Sekolah"
+                  className="w-full h-full object-contain drop-shadow"
+                />
+              ) : (
+                <Building2 className="w-8 h-8 text-blue-300 opacity-80" />
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -241,60 +292,221 @@ export const SchoolProfileEditor: React.FC<SchoolProfileEditorProps> = ({ profil
           </div>
         </div>
 
-        {/* Section Logo */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3 border-b border-slate-100 pb-3">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-              <ImageIcon className="w-5 h-5" />
+        {/* Section Pengaturan Logo & Kop Surat Resmi (Standar Kota Malang) */}
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-bold text-slate-800 text-base">
+                  Pengaturan Logo & Kop Surat Resmi Kedinasan
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Konfigurasi Lambang Pemkot Malang (sisi kiri) dan Logo Sekolah / Tut Wuri Handayani (sisi kanan)
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold text-slate-800 text-base">Logo Resmi Instansi</h3>
-              <p className="text-xs text-slate-500">Muncul pada Kop Surat, Stiker SIMBADA, dan KIR</p>
+            
+            <label className="flex items-center gap-2 cursor-pointer bg-slate-50 hover:bg-slate-100 px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 transition">
+              <input
+                type="checkbox"
+                checked={formData.showPemkotLogo !== false}
+                onChange={(e) => handleChange('showPemkotLogo', e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded accent-blue-600 cursor-pointer"
+              />
+              <span>Tampilkan Logo Pemkot di Kop</span>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* 1. KONTROL LOGO PEMKOT MALANG (SISI KIRI KOP SURAT) */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-blue-600"></div>
+                  <h4 className="font-bold text-slate-900 text-sm">
+                    1. Logo Pemerintah Kota Malang (Kiri Kop)
+                  </h4>
+                </div>
+                <span className="text-[10px] font-semibold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">
+                  Sisi Kiri
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-28 rounded-xl border-2 border-dashed border-blue-300 bg-white p-2 flex items-center justify-center shrink-0 shadow-inner">
+                  {pemkotPreview ? (
+                    <img
+                      src={pemkotPreview}
+                      alt="Logo Pemkot Malang"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 text-center">Kosong</span>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleSetDefaultPemkotLogo}
+                      className="w-full px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                      <span>Pasang Lambang Pemkot Malang</span>
+                    </button>
+
+                    <label className="w-full px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition">
+                      <Upload className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Unggah Logo Pemkot Sendiri</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handlePemkotLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  <div>
+                    <input
+                      type="text"
+                      value={formData.pemkotLogoUrl || ''}
+                      onChange={(e) => {
+                        handleChange('pemkotLogoUrl', e.target.value);
+                        setPemkotPreview(e.target.value);
+                      }}
+                      placeholder="Atau tempel URL gambar Web..."
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-[11px] bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 2. KONTROL LOGO SEKOLAH / TUT WURI (SISI KANAN KOP SURAT) */}
+            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full bg-emerald-600"></div>
+                  <h4 className="font-bold text-slate-900 text-sm">
+                    2. Logo Satuan Pendidikan (Kanan Kop)
+                  </h4>
+                </div>
+                <span className="text-[10px] font-semibold px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-md">
+                  Sisi Kanan
+                </span>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="w-24 h-28 rounded-xl border-2 border-dashed border-emerald-300 bg-white p-2 flex items-center justify-center shrink-0 shadow-inner">
+                  {schoolLogoPreview ? (
+                    <img
+                      src={schoolLogoPreview}
+                      alt="Logo Sekolah"
+                      className="w-full h-full object-contain"
+                    />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 text-center">Kosong</span>
+                  )}
+                </div>
+
+                <div className="flex-1 space-y-2">
+                  <div className="flex flex-col gap-1.5">
+                    <button
+                      type="button"
+                      onClick={handleSetDefaultSchoolLogo}
+                      className="w-full px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                      <span>Pasang Logo Tut Wuri / Dikbud</span>
+                    </button>
+
+                    <label className="w-full px-3 py-1.5 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-semibold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-1.5 transition">
+                      <Upload className="w-3.5 h-3.5 text-slate-500" />
+                      <span>Unggah Logo Sekolah Sendiri</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleSchoolLogoUpload}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+
+                  <div>
+                    <input
+                      type="text"
+                      value={formData.logoUrl || ''}
+                      onChange={(e) => {
+                        handleChange('logoUrl', e.target.value);
+                        setSchoolLogoPreview(e.target.value);
+                      }}
+                      placeholder="Atau tempel URL gambar Web..."
+                      className="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg text-[11px] bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="w-28 h-28 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex items-center justify-center p-2">
-              {logoPreview ? (
-                <img src={logoPreview} alt="Logo" className="w-full h-full object-contain" />
-              ) : (
-                <span className="text-xs text-slate-400">Belum ada logo</span>
-              )}
+          {/* PRATINJAU LANGSUNG KOP SURAT (LIVE PREVIEW) */}
+          <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 space-y-2">
+            <div className="flex items-center justify-between text-xs font-bold text-slate-700">
+              <span className="flex items-center gap-1.5">
+                <Eye className="w-4 h-4 text-blue-600" />
+                Pratinjau Kop Surat Resmi pada Dokumen KIR & BAST:
+              </span>
+              <span className="text-[11px] text-slate-500 font-normal">
+                {formData.showPemkotLogo !== false ? 'Mode Logo Ganda (Pemkot Kiri & Sekolah Kanan)' : 'Mode Logo Tunggal'}
+              </span>
             </div>
 
-            <div className="flex-1 space-y-3 w-full">
-              <div className="flex flex-wrap gap-2.5">
-                <label className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl cursor-pointer shadow flex items-center gap-2 transition">
-                  <Upload className="w-4 h-4" />
-                  <span>Unggah Logo (PNG / JPG)</span>
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
-                </label>
+            <div className="bg-white p-4 rounded-xl border border-slate-300 shadow-sm">
+              <div className="flex items-center justify-between gap-4">
+                {/* Logo Kiri (Pemkot) */}
+                <div className="w-16 h-18 shrink-0 flex items-center justify-center">
+                  {formData.showPemkotLogo !== false && pemkotPreview ? (
+                    <img src={pemkotPreview} alt="Logo Pemkot" className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-12 h-14 border border-dashed border-slate-200 rounded flex items-center justify-center text-[8px] text-slate-400">
+                      Off
+                    </div>
+                  )}
+                </div>
 
-                <button
-                  type="button"
-                  onClick={handleSetMalangLogo}
-                  className="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 transition"
-                >
-                  <Sparkles className="w-4 h-4 text-blue-600" />
-                  Gunakan Lambang Pemkot Malang
-                </button>
-              </div>
+                {/* Teks Tengah */}
+                <div className="flex-1 text-center">
+                  <div className="text-[11px] uppercase font-bold tracking-wider text-slate-800">
+                    {formData.government || 'PEMERINTAH KOTA MALANG'}
+                  </div>
+                  <div className="text-[12px] uppercase font-bold text-slate-900">
+                    {formData.opd || 'DINAS PENDIDIKAN DAN KEBUDAYAAN KOTA MALANG'}
+                  </div>
+                  <div className="text-[14px] font-black uppercase text-blue-950">
+                    {formData.schoolName || 'SD NEGERI KAUMAN 1 KOTA MALANG'}
+                  </div>
+                  <div className="text-[9.5px] text-slate-600">
+                    NPSN: {formData.npsn || '20533812'} • {formData.address || 'Kota Malang'}
+                  </div>
+                </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-600 mb-1">
-                  Atau masukkan URL Web Logo:
-                </label>
-                <input
-                  type="text"
-                  value={formData.logoUrl}
-                  onChange={(e) => {
-                    handleChange('logoUrl', e.target.value);
-                    setLogoPreview(e.target.value);
-                  }}
-                  placeholder="https://..."
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs"
-                />
+                {/* Logo Kanan (Sekolah) */}
+                <div className="w-16 h-18 shrink-0 flex items-center justify-center">
+                  {schoolLogoPreview ? (
+                    <img src={schoolLogoPreview} alt="Logo Sekolah" className="w-full h-full object-contain" />
+                  ) : (
+                    <div className="w-12 h-14 border border-dashed border-slate-200 rounded flex items-center justify-center text-[8px] text-slate-400">
+                      Off
+                    </div>
+                  )}
+                </div>
               </div>
+              <div className="w-full h-0.5 bg-slate-900 mt-2"></div>
             </div>
           </div>
         </div>

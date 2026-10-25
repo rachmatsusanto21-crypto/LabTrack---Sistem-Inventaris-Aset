@@ -52,6 +52,10 @@ interface InventoryContextType {
     returnNotes?: string;
   }) => { success: boolean; message: string };
 
+  updateLoan: (id: string, updates: Partial<LoanTransaction>) => { success: boolean; message: string };
+  deleteLoan: (id: string) => { success: boolean; message: string };
+  deleteBatchLoans: (ids: string[]) => { success: boolean; message: string };
+
   updateSchoolProfile: (profile: SchoolProfile) => void;
   createDocument: (doc: Omit<OfficialDocument, 'id' | 'createdAt'>) => void;
   deleteDocument: (id: string) => void;
@@ -404,6 +408,106 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     };
   }, [loans]);
 
+  // Update Loan Transaction
+  const updateLoan = useCallback((id: string, updates: Partial<LoanTransaction>) => {
+    const existing = loans.find((l) => l.id === id);
+    if (!existing) {
+      return { success: false, message: 'Transaksi peminjaman tidak ditemukan!' };
+    }
+
+    // Check if quantity changed and loan is still active (not yet returned)
+    if (updates.quantity !== undefined && updates.quantity !== existing.quantity && existing.status !== 'Dikembalikan') {
+      const diff = updates.quantity - existing.quantity;
+      const targetItem = inventory.find((it) => it.id === existing.itemId);
+      if (targetItem && diff > 0 && targetItem.availableStock < diff) {
+        return {
+          success: false,
+          message: `Stok tidak mencukupi untuk penambahan ${diff} unit! Tersedia: ${targetItem.availableStock} ${targetItem.unit}.`,
+        };
+      }
+
+      // Adjust inventory stock
+      setInventory((prev) =>
+        prev.map((it) =>
+          it.id === existing.itemId
+            ? {
+                ...it,
+                availableStock: Math.max(0, it.availableStock - diff),
+                borrowedStock: Math.max(0, it.borrowedStock + diff),
+                lastUpdated: new Date().toISOString().split('T')[0],
+              }
+            : it
+        )
+      );
+    }
+
+    setLoans((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, ...updates } : l))
+    );
+
+    return { success: true, message: 'Data peminjaman berhasil diperbarui!' };
+  }, [loans, inventory]);
+
+  // Delete Loan Transaction
+  const deleteLoan = useCallback((id: string) => {
+    const existing = loans.find((l) => l.id === id);
+    if (!existing) {
+      return { success: false, message: 'Data peminjaman tidak ditemukan!' };
+    }
+
+    // If active (not returned), restore borrowed stock back to inventory
+    if (existing.status !== 'Dikembalikan') {
+      setInventory((prev) =>
+        prev.map((it) =>
+          it.id === existing.itemId
+            ? {
+                ...it,
+                availableStock: it.availableStock + existing.quantity,
+                borrowedStock: Math.max(0, it.borrowedStock - existing.quantity),
+                lastUpdated: new Date().toISOString().split('T')[0],
+              }
+            : it
+        )
+      );
+    }
+
+    setLoans((prev) => prev.filter((l) => l.id !== id));
+    return {
+      success: true,
+      message: `Peminjaman ${existing.loanNumber} berhasil dihapus.${
+        existing.status !== 'Dikembalikan' ? ` Stok ${existing.quantity} unit dikembalikan ke rak.` : ''
+      }`,
+    };
+  }, [loans]);
+
+  // Delete Batch Loans
+  const deleteBatchLoans = useCallback((ids: string[]) => {
+    if (ids.length === 0) return { success: false, message: 'Tidak ada peminjaman yang dipilih.' };
+
+    const toDelete = loans.filter((l) => ids.includes(l.id));
+    
+    // Restore stock for active loans being deleted
+    toDelete.forEach((loan) => {
+      if (loan.status !== 'Dikembalikan') {
+        setInventory((prev) =>
+          prev.map((it) =>
+            it.id === loan.itemId
+              ? {
+                  ...it,
+                  availableStock: it.availableStock + loan.quantity,
+                  borrowedStock: Math.max(0, it.borrowedStock - loan.quantity),
+                  lastUpdated: new Date().toISOString().split('T')[0],
+                }
+              : it
+          )
+        );
+      }
+    });
+
+    setLoans((prev) => prev.filter((l) => !ids.includes(l.id)));
+    return { success: true, message: `${toDelete.length} data peminjaman berhasil dihapus.` };
+  }, [loans]);
+
   // Update School Profile
   const updateSchoolProfile = useCallback((profile: SchoolProfile) => {
     setSchoolProfile(profile);
@@ -566,6 +670,9 @@ export const InventoryProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         deleteItem,
         borrowItem,
         returnItem,
+        updateLoan,
+        deleteLoan,
+        deleteBatchLoans,
         updateSchoolProfile,
         createDocument,
         deleteDocument,

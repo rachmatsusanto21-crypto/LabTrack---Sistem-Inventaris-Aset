@@ -162,7 +162,9 @@ export interface SchoolProfile {
   labHeadName: string;         // Penanggung Jawab Ruangan Lab. Komputer
   labHeadNip: string;
   
-  logoUrl: string;             // Logo Pemkot Malang / Tut Wuri Handayani
+  logoUrl: string;             // Logo Satuan Pendidikan / Tut Wuri Handayani (Kanan Kop Surat)
+  pemkotLogoUrl?: string;      // Logo Resmi Pemerintah Kota Malang (Kiri Kop Surat)
+  showPemkotLogo?: boolean;    // Toggle tampilkan Logo Pemkot Malang di Kop Surat
   letterPrefix: string;        // 050 / ... / 35.73.401.01
 }
 
